@@ -24,6 +24,12 @@
       required: true
       label: "MySQL DB Password"
       description: "Password for the MySQL user of the created database"
+    - variable: "mysql_config"
+      type: string
+      required: true
+      label: "MySQL DB config"
+      description: "config parameters such as: --lower_table_name=1 "
+
 galera:
   scale: 3
   metadata:
