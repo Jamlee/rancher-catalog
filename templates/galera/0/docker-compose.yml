@@ -1,5 +1,5 @@
 mariadb-galera-server:
-  image: rancher/galera:10.0.22-rancher2
+  image: webbpy89806/emc-galera:10.0.22-rancher2
   net: "container:galera"
   environment:
     TERM: "xterm"
