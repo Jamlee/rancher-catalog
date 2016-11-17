@@ -1,44 +1,68 @@
-drone-lb:
+cloudera-primary-node:
   ports:
-  - ${public_port}:8000
-  tty: true
-  image: rancher/load-balancer-service
-  links:
-  - drone-server:drone-server
-  stdin_open: true
-
-drone-healthcheck:
-  image: rancher/drone-config:v0.1.0
-  volumes_from:
-    - drone-data-volume
-  entrypoint: /giddyup health
-
-drone-server:
-  image: rancher/drone-config:v0.1.0
-  volumes_from:
-    - drone-data-volume
-  labels: 
-    io.rancher.sidekicks: drone-data-volume,drone-daemon,drone-healthcheck
-  external_links:
-    - ${database_service}:database
-
-drone-daemon:
-  image: rancher/drone:0.4
-  net: 'container:drone-server'
-  volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-  volumes_from:
-    - drone-data-volume
-  entrypoint: /opt/rancher/rancher_entry.sh
-
-## Do not change below. Could cause data loss in upgrade.
-drone-data-volume:
-  image: busybox
-  net: none
-  command: /bin/true
+  - 7180:7180/tcp
   labels:
-    io.rancher.container.start_once: 'true'
+    io.rancher.sidekicks: cloudera-primary-node-conf
+    io.rancher.container.pull_image: always
+    io.rancher.container.dns: 'false'
+  command:
+  - /sbin/init
+  tty: true
+  image: reg.index.com/cloudera/primary:v1.0.0
+  privileged: true
   volumes:
-    - /var/lib/drone
-    - /etc/drone
-    - /opt/rancher
+  - /etc/localtime:/etc/localtime
+  stdin_open: true
+cloudera-secondary-node-conf:
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.container.start_once: 'true'
+  image: reg.index.com/cloudera/secondary-conf:v1.0.0
+  links:
+  - cloudera-dns:cloudera-dns
+cloudera-secondary-node:
+  labels:
+    io.rancher.sidekicks: cloudera-secondary-node-conf
+    io.rancher.container.pull_image: always
+    io.rancher.container.dns: 'false'
+  command:
+  - /sbin/init
+  tty: true
+  image: reg.index.com/cloudera/primary:v1.0.0
+  links:
+  - cloudera-dns:cloudera-dns
+  privileged: true
+  volumes:
+  - /etc/localtime:/etc/localtime
+  stdin_open: true
+cloudera-primary-node-conf:
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.container.start_once: 'true'
+  image: reg.index.com/cloudera/primary-conf:v1.0.0
+cloudera-dns-updater:
+  environment:
+    RFC2136_HOST: cloudera-dns
+    RFC2136_PORT: '53'
+    RFC2136_TSIG_KEYNAME: sys
+    RFC2136_TSIG_SECRET: eBUElyB73+5+8HlE13UJGQ==
+    ROOT_DOMAIN: emc
+    TTL: '254'
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.container.create_agent: 'true'
+    io.rancher.container.agent.role: external-dns
+  command:
+  - -provider
+  - rfc2136
+  image: reg.index.com/cloudera/cloudera-dns-updater:v1.0.0
+  links:
+  - cloudera-dns:cloudera-dns
+cloudera-dns:
+  environment:
+    BIND9_FORWARDERS: 114.114.114.114;8.8.8.8;
+    BIND9_KEY: eBUElyB73+5+8HlE13UJGQ==
+    BIND9_KEYNAME: sys
+    BIND9_ROOTDOMAIN: emc
+    RANCHER_ENV: 'true'
+  image: reg.index.com/cloudera/docker-bind9:v1.2.0

@@ -1,17 +1,7 @@
-# Drone
+# Cloudera CDH
 
 ### Info:
 
-This template creates an instance of Drone CI server 0.4.
+Cloudera provides a scalable, flexible, integrated platform that makes it easy to manage rapidly increasing volumes and varieties of data in your enterprise. Cloudera products and solutions enable you to deploy and manage Apache Hadoop and related projects, manipulate and analyze your data, and keep that data secure and protected.
 
-### Usage:
-
-Select the Drone template from the catalog. Provide the following information:
-
-1. Database driver
-2. Database configuration: this will look like either a path `/var/lib/drone/sqlite3` or a connection string `<user>:<password>@tcp(database:<port>)<database>?parseTime=true`
-The name will always be database.
-3. Remote repository store. (Ie. GitHub)
-4. Remote repository store configuration.
-
-See [Drone documentation](http://readme.drone.io/setup/overview/) for complete information.
+See [CDH documentation](http://www.cloudera.com/documentation/enterprise/latest/topics/introduction.htm) for complete information.

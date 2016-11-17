@@ -1,5 +1,5 @@
-name: Drone
+name: Cloudera
 description: |
-    Drone CI Server
-version: 0.4-rancher1
-category: Continuous Integration
+    Bigdata Platform
+version: Coudera
+category: Bigdata
